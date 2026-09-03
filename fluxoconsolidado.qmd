@@ -3,7 +3,8 @@ title: "Relatório de Saldo Consolidado - Fratelli Holding"
 author: "Brener Kuster | Opportune Financial Advisors"
 format:
   html:
-    css: stylesfluxo.css
+    page-layout: full
+    css: styles.css
     toc: false
 ---
 ```{python}
@@ -204,20 +205,19 @@ for col in colunas_financeiras:
 # 7. Renderizar a tabela em Markdown nativo
 print("\n<br>\n")
 print("## Resumo: Geração de Caixa, Investimentos e Endividamento\n")
-md_table = "| Mês | Saldo Inicial | Saldo Final | Geração de Caixa | Geração de Caixa Bruta | Total Investido | Quitação Endividamento |\n"
+md_table = "| Mês | Saldo Inicial | Saldo Final | Geração de Caixa | Total Investido | Quitação Endividamento | Geração de Caixa Bruta |\n"
 md_table += "| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
 
 for _, row in df_caixa.iterrows():
-    md_table += (
-        f"| {row['Mes_Ref']} "
-        f"| {row['Saldo_Inicial']} "
-        f"| {row['Saldo_Final']} "
-        f"| {row['Geracao_Caixa']} "
-        f"| {row['Geracao_Caixa_Bruta']} "
-        f"| {row['Total_Investido']} "
-        f"| {row['Quitacao_Endividamento']} |\n"
-    )
-
+  md_table += (
+      f"| {row['Mes_Ref']} "
+      f"| {row['Saldo_Inicial']} "
+      f"| {row['Saldo_Final']} "
+      f"| {row['Geracao_Caixa']} "
+      f"| {row['Total_Investido']} "
+      f"| {row['Quitacao_Endividamento']} "
+      f"| {row['Geracao_Caixa_Bruta']} |\n"
+  )
 print(md_table)
 ```
 ## Investimentos por Empresa
