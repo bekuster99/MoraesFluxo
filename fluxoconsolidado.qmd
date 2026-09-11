@@ -14,7 +14,7 @@ import pandas as pd
 import plotly.graph_objects as go
 # ==============================
 # Importar bases 
-
+# ==============================
 SaldoMS = pd.read_excel('SaldoMS.xlsx')
 SaldoMS['Data'] = pd.to_datetime(SaldoMS['Data'])
 SaldoSF = pd.read_excel('SaldoSF.xlsx')
@@ -27,7 +27,7 @@ SaldoSB['Data'] = pd.to_datetime(SaldoSB['Data'])
 # ==============================
 
 data_inicio = '2026-01-01'
-data_fim = '2026-07-31'
+data_fim = '2026-08-31'
 
 
 # ==============================
@@ -98,7 +98,7 @@ df_grafico = df_grafico.groupby('AnoMes', as_index=False).last()
 
 # CRIA A COLUNA DE TEXTO FIXO
 # Garante a ordem correta definindo a lista na ordem cronológica
-nomes_meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho']
+nomes_meses = ['Janeiro','Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho','Agosto']
 df_grafico['Mes_Texto'] = nomes_meses[:len(df_grafico)]
 
 fig = go.Figure()
@@ -170,7 +170,9 @@ dados_investimentos = {
     'abr/26': -1039630.61,
     'mai/26': -617344.50,
     'jun/26': -135621.58,
-    'jul/26': -72310.94
+    'jul/26': -72310.94,
+    'ago/26': -127295.27
+
 }
 
 dados_endividamento = {
@@ -180,7 +182,9 @@ dados_endividamento = {
     'abr/26': -489598.08,
     'mai/26': -485498.74,
     'jun/26': -483714.23,
-    'jul/26': -586225.33
+    'jul/26': -586225.33,
+    'ago/26': -592080.78 
+
 }
 
 df_caixa['Total_Investido'] = df_caixa['Mes_Ref'].map(dados_investimentos)
@@ -231,3 +235,4 @@ print(md_table)
 | mai/26 | Pagamento Mensal de Consórcio(55.851,29); Investimento em Projeto Holding(3800,00); Compra de Veículos(250.000,00); Compra de Imobilizado(2711,61) | -R$ 312.362,90 | Consórcio (4.981,60); Imobilizado (300.000,00) | -R$ 304.981,60 | -R$ 617.344,50 |
 | jun/26 | Pagamento Mensal de Consórcio(28.609,90); Investimento em Projeto Holding(3338,00); Compra de Veículos(14.960,00); Compra de Imobilizado(89.829,62) | -R$ 126.952,56 | Consórcio (8.669,02) | -R$ 8.669,02 | -R$ 135.621,58 |
 | jul/26 | Pagamento Mensal de Consórcio(38.162,00); Compra de Imobilizado(29.102,27) | -R$ 67.264,27 | Consórcio (5.046,67) | -R$ 5.046,67 | -R$ 72.310,94 |
+| ago/26 | Pagamento Mensal de Consórcio(38.956,26); Compra de Imobilizado(79.328.67) | -R$ 118.284,93 | Consórcio (9.010,34) | -R$ 9.010,34 | -R$ 127.295,27 |
