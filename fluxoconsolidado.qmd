@@ -27,7 +27,7 @@ SaldoSB['Data'] = pd.to_datetime(SaldoSB['Data'])
 # ==============================
 
 data_inicio = '2026-01-01'
-data_fim = '2026-08-31'
+data_fim = '2026-09-30'
 
 
 # ==============================
@@ -98,7 +98,7 @@ df_grafico = df_grafico.groupby('AnoMes', as_index=False).last()
 
 # CRIA A COLUNA DE TEXTO FIXO
 # Garante a ordem correta definindo a lista na ordem cronológica
-nomes_meses = ['Janeiro','Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho','Agosto']
+nomes_meses = ['Janeiro','Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho','Agosto','Setembro']
 df_grafico['Mes_Texto'] = nomes_meses[:len(df_grafico)]
 
 fig = go.Figure()
@@ -171,8 +171,8 @@ dados_investimentos = {
     'mai/26': -617344.50,
     'jun/26': -135621.58,
     'jul/26': -72310.94,
-    'ago/26': -127295.27
-
+    'ago/26': -127295.27,
+    'set/26': -1945058.45   
 }
 
 dados_endividamento = {
@@ -183,8 +183,8 @@ dados_endividamento = {
     'mai/26': -485498.74,
     'jun/26': -483714.23,
     'jul/26': -586225.33,
-    'ago/26': -592080.78 
-
+    'ago/26': -592080.78,
+    'set/26': -574737.75
 }
 
 df_caixa['Total_Investido'] = df_caixa['Mes_Ref'].map(dados_investimentos)
