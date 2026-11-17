@@ -27,7 +27,7 @@ SaldoSB['Data'] = pd.to_datetime(SaldoSB['Data'])
 # ==============================
 
 data_inicio = '2026-01-01'
-data_fim = '2026-09-30'
+data_fim = '2026-10-30'
 
 
 # ==============================
@@ -98,7 +98,7 @@ df_grafico = df_grafico.groupby('AnoMes', as_index=False).last()
 
 # CRIA A COLUNA DE TEXTO FIXO
 # Garante a ordem correta definindo a lista na ordem cronológica
-nomes_meses = ['Janeiro','Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho','Agosto','Setembro']
+nomes_meses = ['Janeiro','Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho','Agosto','Setembro','Outubro']
 df_grafico['Mes_Texto'] = nomes_meses[:len(df_grafico)]
 
 fig = go.Figure()
@@ -145,21 +145,42 @@ fig.show()
 # Geração de Caixa vs Investimentos vs Endividamento
 # ==============================
 
-# 1. Somar o saldo de todas as contas para obter o Saldo Total Diário
+# Passo 0 — Criar o Saldo_Total ANTES de qualquer agregação
 df['Saldo_Total'] = df['Valor Banco_MS'] + df['Valor Banco_SB'] + df['Saldo Final']
 
-# 2. Criar coluna de mês/ano para agrupamento (padrão 'mai/26')
-traducao_meses = {'jan': 'jan', 'feb': 'fev', 'mar': 'mar', 'apr': 'abr', 'may': 'mai', 'jun': 'jun', 'jul': 'jul', 'aug': 'ago', 'sep': 'set', 'oct': 'out', 'nov': 'nov', 'dec': 'dez'}
-df['Mes_Ref'] = df['Data'].dt.strftime('%b').str.lower().map(traducao_meses) + df['Data'].dt.strftime('/%y')
+# Passo 1 — Ordenar por data real e gerar Mes_Ref como período mensal
+df['Data'] = pd.to_datetime(df['Data'])
+df = df.sort_values('Data').reset_index(drop=True)
+df['Mes_Ref'] = df['Data'].dt.to_period('M')
 
-# 3. Isolar o primeiro e último dia de cada mês
-df_caixa = df.groupby('Mes_Ref', sort=False).agg(
-    Saldo_Inicial=('Saldo_Total', 'first'),
-    Saldo_Final=('Saldo_Total', 'last')
-).reset_index()
+# Passo 2 — Saldo_Final = último Saldo_Total de cada mês
+saldo_final = df.groupby('Mes_Ref')['Saldo_Total'].last()
 
-# 4. Calcular Geração de Caixa (Final - Inicial)
+# Passo 3 — Saldo_Inicial = Saldo_Final do mês anterior (shift de 1)
+saldo_inicial = saldo_final.shift(1)
+# Primeiro mês do histórico: usa o primeiro saldo disponível como âncora
+if len(saldo_inicial) > 0 and pd.isna(saldo_inicial.iloc[0]):
+    saldo_inicial.iloc[0] = df['Saldo_Total'].iloc[0]
+
+# Passo 4 — Montar o df_caixa no mesmo formato que o resto do código espera
+df_caixa = pd.DataFrame({
+    'Mes_Ref': saldo_final.index.strftime('%b/%y').str.lower(),
+    'Saldo_Final': saldo_final.values,
+    'Saldo_Inicial': saldo_inicial.values
+})
+
+# Manter o padrão 'mai/26' nas legendas
+traducao_meses = {'jan': 'jan', 'feb': 'fev', 'mar': 'mar', 'apr': 'abr', 'may': 'mai',
+                  'jun': 'jun', 'jul': 'jul', 'aug': 'ago', 'sep': 'set', 'oct': 'out',
+                  'nov': 'nov', 'dec': 'dez'}
+df_caixa['Mes_Ref'] = (
+    df_caixa['Mes_Ref'].str.split('/').str[0].map(traducao_meses)
+    + '/' + df_caixa['Mes_Ref'].str.split('/').str[1]
+)
+
+# Passo 4.1 — Geração de Caixa = Final do mês - Final do mês anterior
 df_caixa['Geracao_Caixa'] = df_caixa['Saldo_Final'] - df_caixa['Saldo_Inicial']
+
 
 # 5. Mapear os totais investidos e endividamento
 ### INCLUIR GERAÇÃO DE CAIXA BRUTA QUE É A GERAÇÃO DE CAIXA + INVESTIMENTOS + QUITAÇÃO DE ENDIVIDAMENTO #####
@@ -172,7 +193,8 @@ dados_investimentos = {
     'jun/26': -135621.58,
     'jul/26': -72310.94,
     'ago/26': -127295.27,
-    'set/26': -1945058.45   
+    'set/26': -1945058.45,
+    'out/26': -664990.11
 }
 
 dados_endividamento = {
@@ -184,7 +206,9 @@ dados_endividamento = {
     'jun/26': -483714.23,
     'jul/26': -586225.33,
     'ago/26': -592080.78,
-    'set/26': -574737.75
+    'set/26': -574737.75,
+    'out/26': -622059.19 
+
 }
 
 df_caixa['Total_Investido'] = df_caixa['Mes_Ref'].map(dados_investimentos)
@@ -236,3 +260,5 @@ print(md_table)
 | jun/26 | Pagamento Mensal de Consórcio(28.609,90); Investimento em Projeto Holding(3338,00); Compra de Veículos(14.960,00); Compra de Imobilizado(89.829,62) | -R$ 126.952,56 | Consórcio (8.669,02) | -R$ 8.669,02 | -R$ 135.621,58 |
 | jul/26 | Pagamento Mensal de Consórcio(38.162,00); Compra de Imobilizado(29.102,27) | -R$ 67.264,27 | Consórcio (5.046,67) | -R$ 5.046,67 | -R$ 72.310,94 |
 | ago/26 | Pagamento Mensal de Consórcio(38.956,26); Compra de Imobilizado(79.328.67) | -R$ 118.284,93 | Consórcio (9.010,34) | -R$ 9.010,34 | -R$ 127.295,27 |
+| set/26 | Pagamento Mensal de Consórcio(38.381,07); Compra de Imobilizado(32.754.19); Veículos(1.865.000,00) | -R$ 1.936.135,26 | Consórcio (8.923,19) | -R$ 8.923,19 | -R$ 1.945.058,45 |
+| out/26 | Pagamento Mensal de Consórcio(38.410,50); Compra de Imobilizado(30.292,86); Veículos(52.500,00) | -R$ 121.203,36 | Consórcio (8.786,75); Imobilizado(535.000,00) | -R$ 543.786,75 | -R$ 664.990,11 |
